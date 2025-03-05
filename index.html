@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Command Agent</title>
+</head>
+<body>
+    <h1>AI Agent Voice Command</h1>
+    <button onclick="startListening()">🎙 Speak</button>
+    <p id="response"></p>
+
+    <script>
+        function startListening() {
+            let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+
+            recognition.onresult = function(event) {
+                let command = event.results[0][0].transcript;
+                document.getElementById("response").innerText = "You said: " + command;
+
+                // Send command to Flask API
+                fetch("https://your-api.onrender.com/execute", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ command: command })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("response").innerText += "\nResponse: " + data.output;
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            };
+
+            recognition.start();
+        }
+    </script>
+</body>
+</html>
