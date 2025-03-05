@@ -1,25 +1,26 @@
 from flask import Flask, request, jsonify
-import subprocess
 
 app = Flask(__name__)
 
-@app.route("/execute", methods=["POST"])
-def execute_command():
+@app.route('/')
+def home():
+    return jsonify({"message": "Flask API is running on Render!"})
+
+@app.route('/command', methods=['POST'])
+def process_command():
     data = request.json
-    command = data.get("command", "")
+    command = data.get("command")
+    
+    if command == "open whatsapp":
+        return jsonify({"action": "Opening WhatsApp"})
+    elif command == "turn off wifi":
+        return jsonify({"action": "Turning off WiFi"})
+    elif command == "turn on wifi":
+        return jsonify({"action": "Turning on WiFi"})
+    else:
+        return jsonify({"error": "Command not recognized"})
 
-    if not command:
-        return jsonify({"error": "No command provided"}), 400
-
-    try:
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-
-        return jsonify({
-            "output": result.stdout or "Executed successfully",
-            "error": result.stderr if result.stderr else None
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    import os
+    port = int(os.environ.get("PORT", 10000))  # Change this
+    app.run(host="0.0.0.0", port=port)
